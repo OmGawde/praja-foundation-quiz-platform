@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Stitch "Sovereign Scholar" Design System ─── */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f6f9ff;
+  color: #121d25;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Gradient Primary Button */
+.gradient-primary {
+  background: linear-gradient(135deg, #004481 0%, #005baa 100%);
+}
+
+/* Glassmorphism Navigation */
+.glass-nav {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Ambient Shadow (Stitch: uses secondary-tinted shadow, not black) */
+.ambient-shadow {
+  box-shadow: 0 12px 32px -4px rgba(11, 54, 130, 0.08);
+}
+
+/* Ghost Border (Stitch: outline-variant at 15% opacity) */
+.ghost-border {
+  border: 1px solid rgba(193, 198, 211, 0.15);
+}
+
+/* Input Focus Ring */
+.input-focus-ring:focus {
+  border-color: rgba(0, 68, 129, 0.4);
+  box-shadow: 0 0 0 4px #d5e3ff;
+  outline: none;
+}
+
+/* Pulse animation for Live badges */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f6f9ff;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c6d3;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #727783;
+}
+
+/* Selection color */
+::selection {
+  background-color: #005baa;
+  color: #bbd4ff;
+}
+
+/* Material Symbols base settings */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Transition utilities */
+.transition-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+/* No-border table cell fix */
+table {
+  border-collapse: collapse;
+}
