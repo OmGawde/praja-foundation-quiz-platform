@@ -2,16 +2,83 @@ const router = require('express').Router();
 const Team = require('../models/Team');
 const Quiz = require('../models/Quiz');
 const { auth } = require('../middleware/auth');
+const validateObjectId = require('../middleware/validate');
 
-// POST /api/teams/register - Register team with join code (PUBLIC)
+const Otp = require('../models/Otp');
+const sendEmail = require('../utils/mailer');
+
+// POST /api/teams/send-otp - Send OTP verification email to team leader (PUBLIC)
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { email, joinCode } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    // Validate join code / quiz
+    const quiz = await Quiz.findOne({ joinCode });
+    if (!quiz) return res.status(404).json({ error: 'Invalid join code' });
+
+    // Check if team email is already registered
+    const existingTeam = await Team.findOne({
+      quizId: quiz._id,
+      email: email.toLowerCase(),
+      isActive: true
+    });
+    if (existingTeam) {
+      return res.status(400).json({ error: 'A team with this email has already registered for this quiz' });
+    }
+
+    // Generate 6-digit OTP code
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save to Database
+    await Otp.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      { otp: otpCode, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // Send verification email
+    await sendEmail({
+      to: email,
+      subject: 'Verification Code for Praja Quiz Registration',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b;">
+          <h2 style="color: #2563eb;">Praja Quiz Verification</h2>
+          <p>You requested a verification code to register your team for <strong>${quiz.title}</strong>.</p>
+          <div style="margin: 24px 0; padding: 16px; background-color: #f1f5f9; border-radius: 8px; text-align: center;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #1e1b4b;">${otpCode}</span>
+          </div>
+          <p style="font-size: 14px; color: #64748b;">This verification code is valid for 5 minutes. If you did not request this, you can safely ignore this email.</p>
+        </div>
+      `
+    });
+
+    res.json({ message: 'Verification code sent to email' });
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    res.status(500).json({ error: 'Failed to send verification code. Please check your email and try again.' });
+  }
+});
+
+// POST /api/teams/register - Register team with join code & OTP verification (PUBLIC)
 router.post('/register', async (req, res) => {
   try {
-    const { teamName, participant1, participant2, institute, email, phone, joinCode } = req.body;
+    const { teamName, participant1, participant2, institute, email, phone, joinCode, otp } = req.body;
+
+    if (!otp) {
+      return res.status(400).json({ error: 'Verification code (OTP) is required' });
+    }
 
     // Find quiz by join code
     const quiz = await Quiz.findOne({ joinCode });
     if (!quiz) {
       return res.status(404).json({ error: 'Invalid join code' });
+    }
+
+    // Verify OTP first
+    const record = await Otp.findOne({ email: email.toLowerCase(), otp });
+    if (!record) {
+      return res.status(400).json({ error: 'Invalid or expired verification code' });
     }
 
     // Check quiz status
@@ -51,6 +118,9 @@ router.post('/register', async (req, res) => {
     });
     await team.save();
 
+    // Consume the OTP
+    await Otp.deleteOne({ _id: record._id });
+
     res.status(201).json({
       team,
       quiz: {
@@ -61,7 +131,7 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Registration failed. Please check your input.' });
   }
 });
 
@@ -75,12 +145,12 @@ router.get('/', async (req, res) => {
       .sort({ score: -1, totalResponseTime: 1 });
     res.json(teams);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to load teams.' });
   }
 });
 
 // GET /api/teams/:id - Get single team
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId(['id']), async (req, res) => {
   try {
     const team = await Team.findById(req.params.id)
       .populate('quizId', 'title joinCode status maxTeams')
@@ -91,12 +161,12 @@ router.get('/:id', async (req, res) => {
     if (!team) return res.status(404).json({ error: 'Team not found' });
     res.json(team);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to load team.' });
   }
 });
 
 // PATCH /api/teams/:id/remove - Deactivate team
-router.patch('/:id/remove', auth, async (req, res) => {
+router.patch('/:id/remove', auth, validateObjectId(['id']), async (req, res) => {
   try {
     const team = await Team.findById(req.params.id);
     if (!team) return res.status(404).json({ error: 'Team not found' });
@@ -115,7 +185,7 @@ router.patch('/:id/remove', auth, async (req, res) => {
 
     res.json({ message: 'Team removed successfully', team });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to remove team.' });
   }
 });
 

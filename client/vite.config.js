@@ -8,15 +8,35 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
-        changeOrigin: true
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED') return;
+            console.error('API Proxy Error:', err.message);
+          });
+        }
       },
       '/uploads': {
         target: 'http://localhost:5000',
-        changeOrigin: true
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED') return;
+            console.error('Uploads Proxy Error:', err.message);
+          });
+        }
       },
       '/socket.io': {
         target: 'http://localhost:5000',
-        ws: true
+        ws: true,
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            // Suppress standard connection aborts (e.g. user closes tab or refreshes page)
+            if (err.code === 'ECONNRESET' || err.code === 'ECONNABORTED' || err.code === 'ECONNREFUSED') return;
+            console.error('Socket Proxy Error:', err.message);
+          });
+        }
       }
     }
   }

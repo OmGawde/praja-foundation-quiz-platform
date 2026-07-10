@@ -3,6 +3,7 @@ const Round = require('../models/Round');
 const Quiz = require('../models/Quiz');
 const Team = require('../models/Team');
 const { auth } = require('../middleware/auth');
+const validateObjectId = require('../middleware/validate');
 
 // GET /api/rounds - List rounds (with competitionId filter)
 router.get('/', async (req, res) => {
@@ -28,12 +29,12 @@ router.get('/', async (req, res) => {
 
     res.json(enriched);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to load rounds.' });
   }
 });
 
 // GET /api/rounds/:id - Get single round
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId(['id']), async (req, res) => {
   try {
     const round = await Round.findById(req.params.id).populate('competitionId', 'name');
     if (!round) return res.status(404).json({ error: 'Round not found' });
@@ -41,7 +42,7 @@ router.get('/:id', async (req, res) => {
     const quizzes = await Quiz.find({ roundId: round._id });
     res.json({ ...round.toObject(), quizzes });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to load round.' });
   }
 });
 
@@ -58,12 +59,12 @@ router.post('/', auth, async (req, res) => {
     await round.save();
     res.status(201).json(round);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to create round.' });
   }
 });
 
 // PUT /api/rounds/:id - Update round
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, validateObjectId(['id']), async (req, res) => {
   try {
     const round = await Round.findByIdAndUpdate(
       req.params.id,
@@ -73,7 +74,7 @@ router.put('/:id', auth, async (req, res) => {
     if (!round) return res.status(404).json({ error: 'Round not found' });
     res.json(round);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to update round.' });
   }
 });
 
@@ -86,18 +87,18 @@ router.put('/reorder/batch', auth, async (req, res) => {
     ));
     res.json({ message: 'Rounds reordered successfully' });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to reorder rounds.' });
   }
 });
 
 // DELETE /api/rounds/:id - Delete round
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, validateObjectId(['id']), async (req, res) => {
   try {
     const round = await Round.findByIdAndDelete(req.params.id);
     if (!round) return res.status(404).json({ error: 'Round not found' });
     res.json({ message: 'Round deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to delete round.' });
   }
 });
 

@@ -83,17 +83,6 @@ export default function QuizPlay() {
     };
   }, [socket, quizId, teamId, navigate]);
 
-  // Client-side countdown (visual only, server controls actual timer)
-  useEffect(() => {
-    if (timeLeft <= 0 && !submitted && question) {
-      fetchNext();
-      return;
-    }
-    if (timeLeft <= 0 || submitted) return;
-    const timer = setInterval(() => setTimeLeft(prev => Math.max(0, prev - 1)), 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft, submitted, question, fetchNext]);
-
   const handleSubmit = useCallback(() => {
     if (selected === null || submitted || !socket) return;
     socket.emit('submitAnswer', { quizId, teamId, questionId: question._id, selectedOption: selected });
@@ -104,6 +93,17 @@ export default function QuizPlay() {
     if (!socket) return;
     socket.emit('fetchNextQuestion', { quizId, teamId });
   }, [socket, quizId, teamId]);
+
+  // Client-side countdown (visual only, server controls actual timer)
+  useEffect(() => {
+    if (timeLeft <= 0 && !submitted && question) {
+      fetchNext();
+      return;
+    }
+    if (timeLeft <= 0 || submitted) return;
+    const timer = setInterval(() => setTimeLeft(prev => Math.max(0, prev - 1)), 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft, submitted, question, fetchNext]);
 
   const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   const progress = question ? ((question.questionNumber) / question.totalQuestions) * 100 : 0;

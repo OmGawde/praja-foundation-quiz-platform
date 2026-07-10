@@ -3,6 +3,7 @@ const Quiz = require('../models/Quiz');
 const Question = require('../models/Question');
 const Team = require('../models/Team');
 const { auth } = require('../middleware/auth');
+const validateObjectId = require('../middleware/validate');
 const generateJoinCode = require('../utils/generateJoinCode');
 
 // GET /api/quizzes - List quizzes (with roundId filter)
@@ -29,7 +30,7 @@ router.get('/', async (req, res) => {
 
     res.json(enriched);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to load quizzes.' });
   }
 });
 
@@ -70,12 +71,12 @@ router.get('/join/:joinCode', async (req, res) => {
       competitionName: quiz.roundId?.competitionId?.name
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to validate join code.' });
   }
 });
 
 // GET /api/quizzes/:id - Get single quiz with details
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId(['id']), async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id)
       .populate('roundId', 'name competitionId order');
@@ -88,7 +89,7 @@ router.get('/:id', async (req, res) => {
 
     res.json({ ...quiz.toObject(), questions, teams, questionCount, teamCount });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to load quiz.' });
   }
 });
 
@@ -103,12 +104,12 @@ router.post('/', auth, async (req, res) => {
     await quiz.save();
     res.status(201).json(quiz);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to create quiz.' });
   }
 });
 
 // POST /api/quizzes/:id/duplicate - Duplicate quiz
-router.post('/:id/duplicate', auth, async (req, res) => {
+router.post('/:id/duplicate', auth, validateObjectId(['id']), async (req, res) => {
   try {
     const originalQuiz = await Quiz.findById(req.params.id);
     if (!originalQuiz) return res.status(404).json({ error: 'Quiz not found' });
@@ -144,12 +145,12 @@ router.post('/:id/duplicate', auth, async (req, res) => {
     res.status(201).json(newQuiz);
   } catch (error) {
     console.error('Duplicate quiz error:', error);
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to duplicate quiz.' });
   }
 });
 
 // PUT /api/quizzes/:id - Update quiz
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, validateObjectId(['id']), async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
     if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
@@ -157,16 +158,22 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(400).json({ error: 'Cannot edit a live quiz' });
     }
 
-    Object.assign(quiz, req.body);
+    // SECURITY: Only allow whitelisted fields to be updated (prevents status/joinCode tampering)
+    const allowedFields = ['title', 'maxTeams'];
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        quiz[field] = req.body[field];
+      }
+    }
     await quiz.save();
     res.json(quiz);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to update quiz.' });
   }
 });
 
 // PATCH /api/quizzes/:id/archive - Toggle archive
-router.patch('/:id/archive', auth, async (req, res) => {
+router.patch('/:id/archive', auth, validateObjectId(['id']), async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
     if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
@@ -175,7 +182,7 @@ router.patch('/:id/archive', auth, async (req, res) => {
     await quiz.save();
     res.json(quiz);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to toggle archive.' });
   }
 });
 

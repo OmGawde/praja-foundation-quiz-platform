@@ -27,6 +27,7 @@ export default function LiveLeaderboard() {
 
     socket.on('teamJoined', (data) => setTeams(data.teams));
     socket.on('leaderboardUpdate', (data) => setTeams(data.leaderboard));
+    socket.on('error', (data) => toast.error(data.message || 'Socket error occurred'));
     socket.on('quizStarted', (data) => {
       setCurrentQuestion(data.question);
       loadData();
@@ -43,6 +44,7 @@ export default function LiveLeaderboard() {
     return () => {
       socket.off('teamJoined');
       socket.off('leaderboardUpdate');
+      socket.off('error');
       socket.off('quizStarted');
       socket.off('nextQuestion');
       socket.off('quizEnded');

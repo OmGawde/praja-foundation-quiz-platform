@@ -9,9 +9,33 @@ const settingsSchema = new mongoose.Schema({
     type: String,
     default: 'National Excellence in Education. Join the premier platform for national-level competitions.'
   },
+  heroTitleLine1: {
+    type: String,
+    default: 'Compete.'
+  },
+  heroTitleLine2: {
+    type: String,
+    default: 'Learn.'
+  },
+  heroTitleLine3: {
+    type: String,
+    default: 'Lead.'
+  },
   logoUrl: {
     type: String,
     default: ''
+  },
+  landingImageUrl: {
+    type: String,
+    default: ''
+  },
+  landingLiveText: {
+    type: String,
+    default: 'Live National Finals'
+  },
+  landingLiveSubtext: {
+    type: String,
+    default: 'Join competitions happening right now'
   },
   openRegistration: {
     type: Boolean,

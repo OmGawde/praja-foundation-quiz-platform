@@ -14,7 +14,7 @@ export default function Competitions() {
 
   const loadCompetitions = async () => {
     try {
-      const res = await api.get('/competitions');
+      const res = await api.get('/competitions?archived=false');
       setCompetitions(res.data);
     } catch (err) { console.error(err); }
   };
@@ -35,16 +35,7 @@ export default function Competitions() {
   const handleArchive = async (id) => {
     try {
       await api.patch(`/competitions/${id}/archive`);
-      toast.success('Archive toggled');
-      loadCompetitions();
-    } catch (err) { toast.error('Failed'); }
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this competition?')) return;
-    try {
-      await api.delete(`/competitions/${id}`);
-      toast.success('Deleted');
+      toast.success('Competition archived');
       loadCompetitions();
     } catch (err) { toast.error('Failed'); }
   };
@@ -61,7 +52,7 @@ export default function Competitions() {
   };
 
   const filtered = competitions.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
-  const active = filtered.filter(c => c.isActive && !c.isArchived);
+  const active = filtered.filter(c => c.isActive);
   const totalParticipants = competitions.reduce((a, c) => a + (c.participantCount || 0), 0);
 
   return (
@@ -166,11 +157,8 @@ export default function Competitions() {
               <button onClick={() => downloadCSV(comp._id)} className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">
                 <span className="material-symbols-outlined text-sm">download</span>
               </button>
-              <button onClick={() => handleArchive(comp._id)} className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">
+              <button onClick={() => handleArchive(comp._id)} className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors" title="Archive">
                 <span className="material-symbols-outlined text-sm">archive</span>
-              </button>
-              <button onClick={() => handleDelete(comp._id)} className="p-2 text-on-surface-variant hover:bg-error-container hover:text-error rounded-lg transition-colors">
-                <span className="material-symbols-outlined text-sm">delete</span>
               </button>
               <Link to={`/admin/rounds/${comp._id}`} className="px-4 py-2 bg-secondary-container text-on-secondary-container rounded-lg font-medium text-sm flex items-center gap-2 hover:bg-secondary-container/80 transition-colors">
                 Manage <span className="material-symbols-outlined text-sm">arrow_forward</span>

@@ -10,7 +10,7 @@ export default function PublicLayout() {
   }, []);
   return (
     <div className="bg-surface text-on-surface antialiased flex flex-col min-h-screen">
-      {/* TopNavBar — Stitch Design 1 */}
+      {/* TopNavBar */}
       <nav className="fixed top-0 w-full z-50 glass-nav shadow-sm" style={{ backgroundColor: 'rgba(246, 249, 255, 0.85)' }}>
         <div className="flex justify-between items-center px-8 h-16 max-w-7xl mx-auto">
           <Link to="/" className="text-xl font-black tracking-tight text-primary flex items-center gap-2">
@@ -19,11 +19,12 @@ export default function PublicLayout() {
           </Link>
           <div className="hidden md:flex items-center gap-8 font-sans antialiased">
             <Link to="/join" className="text-slate-600 hover:text-blue-600 transition-colors">Join Quiz</Link>
-            <Link to="/login" className="text-slate-600 hover:text-blue-600 transition-colors">Host Quiz</Link>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Login</Link>
-            <Link to="/login" className="text-sm font-medium text-on-primary gradient-primary px-5 py-2 rounded-xl hover:opacity-90 transition-opacity">Register</Link>
+            <Link to="/login" className="text-sm font-medium text-on-primary gradient-primary px-5 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2">
+              <span className="material-symbols-outlined text-base">admin_panel_settings</span>
+              Admin Login
+            </Link>
           </div>
         </div>
       </nav>
@@ -33,7 +34,7 @@ export default function PublicLayout() {
         <Outlet />
       </main>
 
-      {/* Footer — Stitch Design */}
+      {/* Footer */}
       <footer className="w-full py-12 border-t border-slate-100 bg-white mt-auto">
         <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="text-center md:text-left">

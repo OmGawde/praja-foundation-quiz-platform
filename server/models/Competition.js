@@ -26,6 +26,10 @@ const competitionSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  completedAt: {
+    type: Date,
+    default: null
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

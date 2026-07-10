@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Question = require('../models/Question');
 const { auth } = require('../middleware/auth');
 const { uploadExcel } = require('../middleware/upload');
+const validateObjectId = require('../middleware/validate');
 const XLSX = require('xlsx');
 const fs = require('fs');
 
@@ -14,18 +15,18 @@ router.get('/', async (req, res) => {
     const questions = await Question.find({ quizId }).sort({ order: 1 });
     res.json(questions);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to load questions.' });
   }
 });
 
 // GET /api/questions/:id - Get single question
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId(['id']), async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
     if (!question) return res.status(404).json({ error: 'Question not found' });
     res.json(question);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to load question.' });
   }
 });
 
@@ -40,12 +41,12 @@ router.post('/', auth, async (req, res) => {
     await question.save();
     res.status(201).json(question);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to create question.' });
   }
 });
 
 // PUT /api/questions/:id - Update question
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, validateObjectId(['id']), async (req, res) => {
   try {
     const question = await Question.findByIdAndUpdate(
       req.params.id,
@@ -55,18 +56,18 @@ router.put('/:id', auth, async (req, res) => {
     if (!question) return res.status(404).json({ error: 'Question not found' });
     res.json(question);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'Failed to update question.' });
   }
 });
 
 // DELETE /api/questions/:id - Delete question
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, validateObjectId(['id']), async (req, res) => {
   try {
     const question = await Question.findByIdAndDelete(req.params.id);
     if (!question) return res.status(404).json({ error: 'Question not found' });
     res.json({ message: 'Question deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to delete question.' });
   }
 });
 
@@ -120,7 +121,9 @@ router.post('/bulk-upload', auth, uploadExcel.single('file'), async (req, res) =
       questions
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    // Cleanup uploaded file if it exists
+    if (req.file?.path) try { fs.unlinkSync(req.file.path); } catch (e) {}
+    res.status(400).json({ error: 'Failed to upload questions.' });
   }
 });
 

@@ -1,8 +1,23 @@
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 const Quiz = require('../models/Quiz');
 const Question = require('../models/Question');
 const Team = require('../models/Team');
 const Answer = require('../models/Answer');
 const shuffle = require('../utils/shuffle');
+
+// SECURITY: Verify JWT token for admin socket events
+async function verifySocketAdmin(socket) {
+  try {
+    const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.replace('Bearer ', '');
+    if (!token) return null;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+    return user;
+  } catch (err) {
+    return null;
+  }
+}
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
@@ -48,14 +63,21 @@ module.exports = (io) => {
     });
 
     // ─── ADMIN JOINS QUIZ ROOM ───
-    socket.on('adminJoinQuiz', ({ quizId }) => {
+    socket.on('adminJoinQuiz', async ({ quizId }) => {
+      // SECURITY: Verify admin identity
+      const user = await verifySocketAdmin(socket);
+      if (!user) return socket.emit('error', { message: 'Authentication required' });
       socket.join(`quiz_${quizId}`);
-      console.log(`🔑 Admin joined quiz room ${quizId}`);
+      console.log(`🔑 Admin "${user.username}" joined quiz room ${quizId}`);
     });
 
     // ─── START QUIZ (Admin only) ───
     socket.on('startQuiz', async ({ quizId }) => {
       try {
+        // SECURITY: Verify admin identity
+        const user = await verifySocketAdmin(socket);
+        if (!user) return socket.emit('error', { message: 'Authentication required' });
+
         const quiz = await Quiz.findById(quizId);
         if (!quiz) return socket.emit('error', { message: 'Quiz not found' });
         if (quiz.status !== 'lobby') return socket.emit('error', { message: 'Quiz is not in lobby state' });
@@ -172,9 +194,12 @@ module.exports = (io) => {
     // ─── FORCE END QUIZ (Admin) ───
     socket.on('forceEndQuiz', async ({ quizId }) => {
       try {
+        // SECURITY: Verify admin identity
+        const user = await verifySocketAdmin(socket);
+        if (!user) return socket.emit('error', { message: 'Authentication required' });
         await endQuiz(io, quizId);
       } catch (error) {
-        socket.emit('error', { message: error.message });
+        socket.emit('error', { message: 'Failed to end quiz' });
       }
     });
 
