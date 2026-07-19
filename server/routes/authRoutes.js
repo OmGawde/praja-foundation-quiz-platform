@@ -115,6 +115,7 @@ router.post('/send-signup-otp', async (req, res) => {
       `
     });
 
+    console.log(`✉️ Signup OTP email successfully sent to: ${email}`);
     res.json({ message: 'Verification code sent successfully.' });
   } catch (error) {
     console.error('Send signup OTP error:', error);
@@ -175,6 +176,7 @@ router.post('/forgot-password', async (req, res) => {
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
+      console.log(`⚠️ Password reset requested for UNREGISTERED email: ${email}`);
       // Security measure: Do not confirm whether user exists
       return res.json({ message: 'If this email is registered, a password reset link has been sent.' });
     }
@@ -205,6 +207,7 @@ router.post('/forgot-password', async (req, res) => {
       `
     });
 
+    console.log(`✉️ Password reset email successfully sent to: ${user.email}`);
     res.json({ message: 'If this email is registered, a password reset link has been sent.' });
   } catch (error) {
     console.error('Forgot password error:', error);
