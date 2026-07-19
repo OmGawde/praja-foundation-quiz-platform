@@ -95,6 +95,18 @@ quizSocket(io);
 // Make io accessible to routes
 app.set('io', io);
 
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+  app.get('*', (req, res) => {
+    // Prevent API routes from falling back to index.html
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ error: 'API route not found' });
+    }
+    res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
+  });
+}
+
 // Error handling middleware — SECURITY: don't leak stack traces
 app.use((err, req, res, next) => {
   console.error('Server Error:', err.stack);
