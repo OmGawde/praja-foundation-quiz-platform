@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
 export default function PublicLayout() {
   const [settings, setSettings] = useState(null);
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     api.get('/settings').then((res) => setSettings(res.data)).catch(console.error);
@@ -21,10 +23,35 @@ export default function PublicLayout() {
             <Link to="/join" className="text-slate-600 hover:text-blue-600 transition-colors">Join Quiz</Link>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/login" className="text-sm font-medium text-on-primary gradient-primary px-5 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2">
-              <span className="material-symbols-outlined text-base">admin_panel_settings</span>
-              Admin Login
-            </Link>
+            {user ? (
+              <>
+                <span className="text-sm font-medium text-slate-700 hidden sm:inline">
+                  Hi, <span className="font-bold text-primary">{user.username}</span>
+                </span>
+                
+                {(user.role === 'admin' || user.role === 'quiz_manager') && (
+                  <Link to="/admin/dashboard" className="text-sm font-medium text-slate-700 hover:text-primary transition-colors flex items-center gap-1">
+                    <span className="material-symbols-outlined text-base">dashboard</span>
+                    Admin
+                  </Link>
+                )}
+
+                <button onClick={logout} className="text-sm font-medium text-on-primary gradient-primary px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1">
+                  <span className="material-symbols-outlined text-base">logout</span>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-sm font-medium text-slate-700 hover:text-primary transition-colors">
+                  Sign In
+                </Link>
+                <Link to="/register" className="text-sm font-medium text-on-primary gradient-primary px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1">
+                  <span className="material-symbols-outlined text-base">person_add</span>
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

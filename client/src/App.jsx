@@ -13,6 +13,9 @@ import QuizLobby from './pages/public/QuizLobby';
 import QuizPlay from './pages/public/QuizPlay';
 import QuizResults from './pages/public/QuizResults';
 import LoginPage from './pages/public/LoginPage';
+import RegisterPage from './pages/public/RegisterPage';
+import ForgotPasswordPage from './pages/public/ForgotPasswordPage';
+import ResetPasswordPage from './pages/public/ResetPasswordPage';
 import QuizReview from './pages/public/QuizReview';
 import PublicLeaderboard from './pages/public/PublicLeaderboard';
 
@@ -43,6 +46,9 @@ export default function App() {
         <Route path="/join" element={<JoinQuiz />} />
         <Route path="/register/:joinCode" element={<TeamRegistration />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Route>
 
       {/* Quiz Flow - No Layout (focused experience) */}

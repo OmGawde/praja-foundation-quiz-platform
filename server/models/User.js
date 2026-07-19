@@ -30,9 +30,35 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'quiz_manager'],
+    enum: ['admin', 'quiz_manager', 'participant'],
     default: 'quiz_manager'
-  }
+  },
+  // Persistent profile fields for participants
+  teamName: {
+    type: String,
+    trim: true
+  },
+  participant1: {
+    type: String,
+    trim: true
+  },
+  participant2: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  institute: {
+    type: String,
+    trim: true
+  },
+  phone: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  // Password reset fields
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
 }, { timestamps: true });
 
 // Hash password before saving

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -13,9 +13,13 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(form.email, form.password);
+      const data = await login(form.email, form.password);
       toast.success('Welcome back!');
-      navigate('/admin/dashboard');
+      if (data.user.role === 'admin' || data.user.role === 'quiz_manager') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/join');
+      }
     } catch (err) {
       toast.error(err.response?.data?.error || 'Authentication failed');
     } finally {
@@ -27,21 +31,26 @@ export default function LoginPage() {
     <div className="flex-grow pt-8 pb-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[70vh]">
       <div className="w-full max-w-md bg-surface-container-lowest p-8 sm:p-12 rounded-xl ambient-shadow ghost-border">
         <div className="text-center mb-10">
-          <span className="material-symbols-outlined text-primary text-5xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>admin_panel_settings</span>
+          <span className="material-symbols-outlined text-primary text-5xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>lock_person</span>
           <h1 className="text-3xl font-headline font-bold text-on-surface tracking-tight mb-2">
-            Admin Login
+            Sign In
           </h1>
-          <p className="text-on-surface-variant">Access the competition management dashboard.</p>
+          <p className="text-on-surface-variant">Sign in to your administrator or participant account.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-label font-semibold text-on-surface mb-2">Email</label>
             <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required
-              className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-3 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="admin@praja.gov" />
+              className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-3 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="you@example.com" />
           </div>
           <div>
-            <label className="block text-sm font-label font-semibold text-on-surface mb-2">Password</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-label font-semibold text-on-surface">Password</label>
+              <Link to="/forgot-password" className="text-xs text-primary font-semibold hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required
               className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-3 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="••••••••" />
           </div>
@@ -50,6 +59,13 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        <div className="text-center text-sm text-on-surface-variant mt-8 border-t pt-6">
+          Don't have a participant account?{' '}
+          <Link to="/register" className="text-primary font-bold hover:underline">
+            Sign Up Here
+          </Link>
+        </div>
       </div>
     </div>
   );

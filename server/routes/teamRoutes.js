@@ -189,4 +189,77 @@ router.patch('/:id/remove', auth, validateObjectId(['id']), async (req, res) => 
   }
 });
 
+// POST /api/teams/join-direct - Register team directly for logged-in participants (PRIVATE)
+router.post('/join-direct', auth, async (req, res) => {
+  try {
+    const { joinCode } = req.body;
+    if (!joinCode) return res.status(400).json({ error: 'Join code is required' });
+
+    // Find quiz by join code
+    const quiz = await Quiz.findOne({ joinCode: joinCode.trim().toUpperCase() });
+    if (!quiz) {
+      return res.status(404).json({ error: 'Invalid join code' });
+    }
+
+    // Check quiz status
+    if (quiz.status === 'live') {
+      return res.status(400).json({ error: 'Cannot join a quiz that is already live' });
+    }
+    if (quiz.status === 'ended') {
+      return res.status(400).json({ error: 'This quiz has already ended' });
+    }
+
+    // Check if team limit reached
+    const teamCount = await Team.countDocuments({ quizId: quiz._id, isActive: true });
+    if (teamCount >= quiz.maxTeams) {
+      return res.status(400).json({ error: 'This quiz is full. No more teams can join.' });
+    }
+
+    // Check if this user (email) already registered for this quiz
+    const existingTeam = await Team.findOne({
+      quizId: quiz._id,
+      email: req.user.email,
+      isActive: true
+    });
+    
+    if (existingTeam) {
+      return res.json({
+        team: existingTeam,
+        quiz: {
+          _id: quiz._id,
+          title: quiz.title,
+          status: quiz.status,
+          joinCode: quiz.joinCode
+        }
+      });
+    }
+
+    // Create team using the user's profile info
+    const team = new Team({
+      teamName: req.user.teamName || req.user.username,
+      participant1: req.user.participant1 || req.user.username,
+      participant2: req.user.participant2 || '',
+      institute: req.user.institute || 'Default Institute',
+      email: req.user.email,
+      phone: req.user.phone || '',
+      quizId: quiz._id,
+      joinCodeUsed: joinCode.trim().toUpperCase()
+    });
+    await team.save();
+
+    res.status(201).json({
+      team,
+      quiz: {
+        _id: quiz._id,
+        title: quiz.title,
+        status: quiz.status,
+        joinCode: quiz.joinCode
+      }
+    });
+  } catch (error) {
+    console.error('Join direct error:', error);
+    res.status(400).json({ error: 'Failed to join quiz.' });
+  }
+});
+
 module.exports = router;

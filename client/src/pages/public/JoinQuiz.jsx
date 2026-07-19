@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 
@@ -7,16 +8,30 @@ export default function JoinQuiz() {
   const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!joinCode.trim()) return toast.error('Please enter a join code');
+    const code = joinCode.trim().toUpperCase();
+    if (!code) return toast.error('Please enter a join code');
+    
+    if (!user) {
+      toast.error('You must sign in or register to join the quiz.');
+      navigate('/login');
+      return;
+    }
+
+    if (user.role !== 'participant') {
+      return toast.error('Only participant accounts can join and play quizzes.');
+    }
+
     setLoading(true);
     try {
-      await api.get(`/quizzes/join/${joinCode.trim().toUpperCase()}`);
-      navigate(`/register/${joinCode.trim().toUpperCase()}`);
+      const res = await api.post('/teams/join-direct', { joinCode: code });
+      toast.success('Joined quiz lobby!');
+      navigate(`/lobby/${res.data.quiz._id}/${res.data.team._id}`);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Invalid join code');
+      toast.error(err.response?.data?.error || 'Failed to join quiz');
     } finally {
       setLoading(false);
     }
