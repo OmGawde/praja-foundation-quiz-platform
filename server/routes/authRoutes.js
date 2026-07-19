@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
 const sendEmail = require('../utils/mailer');
+const Otp = require('../models/Otp');
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
@@ -76,24 +77,75 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
+// POST /api/auth/send-signup-otp - Send OTP verification email for registration (PUBLIC)
+router.post('/send-signup-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required.' });
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ error: 'An account is already registered with this email address.' });
+    }
+
+    // Generate 6-digit OTP code
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save to Database
+    await Otp.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      { otp: otpCode, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // Send verification email
+    await sendEmail({
+      to: email,
+      subject: 'Verification Code for Account Registration',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b;">
+          <h2 style="color: #2563eb;">Praja Quiz Account Verification</h2>
+          <p>Thank you for signing up! Please verify your email to create your account.</p>
+          <div style="margin: 24px 0; padding: 16px; background-color: #f1f5f9; border-radius: 8px; text-align: center;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #1e1b4b;">${otpCode}</span>
+          </div>
+          <p style="font-size: 14px; color: #64748b;">This verification code is valid for 5 minutes. If you did not request this, you can safely ignore this email.</p>
+        </div>
+      `
+    });
+
+    res.json({ message: 'Verification code sent successfully.' });
+  } catch (error) {
+    console.error('Send signup OTP error:', error);
+    res.status(500).json({ error: 'Failed to send verification code. Please check your email and try again.' });
+  }
+});
+
 // POST /api/auth/register-participant
 router.post('/register-participant', async (req, res) => {
   try {
-    const { username, email, password, teamName, participant1, participant2, institute, phone } = req.body;
+    const { username, email, password, teamName, participant1, participant2, institute, phone, otp } = req.body;
 
-    if (!username || !email || !password || !teamName || !participant1 || !institute) {
-      return res.status(400).json({ error: 'Username, email, password, team name, participant 1, and institute are required.' });
+    if (!username || !email || !password || !teamName || !participant1 || !institute || !otp) {
+      return res.status(400).json({ error: 'Username, email, password, team name, participant 1, institute, and verification code (OTP) are required.' });
+    }
+
+    // Verify OTP first
+    const record = await Otp.findOne({ email: email.toLowerCase(), otp });
+    if (!record) {
+      return res.status(400).json({ error: 'Invalid or expired verification code (OTP).' });
     }
 
     // Check if user exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await User.findOne({ $or: [{ email: email.toLowerCase() }, { username }] });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists with this email or username.' });
     }
 
     const user = new User({
       username,
-      email,
+      email: email.toLowerCase(),
       password,
       role: 'participant',
       teamName,
@@ -103,6 +155,9 @@ router.post('/register-participant', async (req, res) => {
       phone: phone || ''
     });
     await user.save();
+
+    // Consume the OTP
+    await Otp.deleteOne({ _id: record._id });
 
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ user, token });
