@@ -13,6 +13,13 @@ const connectDB = require('./config/db');
 // Connect to MongoDB
 connectDB();
 
+// Ensure uploads directory exists
+const fs = require('fs');
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const app = express();
 const server = http.createServer(app);
 
