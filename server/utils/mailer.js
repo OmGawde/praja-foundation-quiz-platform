@@ -1,4 +1,7 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+const { promisify } = require('util');
+const resolve4 = promisify(dns.resolve4);
 
 const sendEmail = async ({ to, subject, html }) => {
   // ═══════════════════════════════════════════
@@ -8,10 +11,22 @@ const sendEmail = async ({ to, subject, html }) => {
     const smtpPort = parseInt(process.env.SMTP_PORT) || 587;
     const isSecure = smtpPort === 465;
 
+    // Force IPv4 resolution (Railway can't reach Gmail over IPv6)
+    let smtpHost = process.env.SMTP_HOST;
+    try {
+      const addresses = await resolve4(smtpHost);
+      if (addresses && addresses.length > 0) {
+        console.log(`📡 Resolved ${smtpHost} → IPv4 ${addresses[0]}`);
+        smtpHost = addresses[0];
+      }
+    } catch (e) {
+      console.log(`⚠️ IPv4 DNS resolution failed, using hostname directly`);
+    }
+
     console.log(`📧 Sending email via Gmail SMTP to: ${to} (from: ${process.env.SMTP_USER})`);
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host: smtpHost,
       port: smtpPort,
       secure: isSecure,
       auth: {
@@ -19,7 +34,8 @@ const sendEmail = async ({ to, subject, html }) => {
         pass: process.env.SMTP_PASS
       },
       tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        servername: process.env.SMTP_HOST
       },
       connectionTimeout: 15000,
       greetingTimeout: 15000
