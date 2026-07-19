@@ -5,7 +5,7 @@ const sendEmail = async ({ to, subject, html }) => {
   // Priority 1: Use Resend HTTP API (works on Render, no SMTP ports needed)
   // ═══════════════════════════════════════════
   if (process.env.RESEND_API_KEY) {
-    const fromEmail = process.env.SMTP_USER || 'onboarding@resend.dev';
+    const replyTo = process.env.SMTP_USER || undefined;
     console.log(`📧 Sending email via Resend API to: ${to}`);
 
     const response = await fetch('https://api.resend.com/emails', {
@@ -15,7 +15,8 @@ const sendEmail = async ({ to, subject, html }) => {
         'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
       },
       body: JSON.stringify({
-        from: `Praja Quiz Platform <${fromEmail}>`,
+        from: 'Praja Quiz Platform <onboarding@resend.dev>',
+        reply_to: replyTo,
         to: [to],
         subject,
         html
