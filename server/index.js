@@ -1,8 +1,4 @@
 require('dotenv').config();
-const dns = require('dns');
-if (typeof dns.setDefaultResultOrder === 'function') {
-  dns.setDefaultResultOrder('ipv4first');
-}
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -80,6 +76,18 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
+
+// Strict OTP/email rate limiter: 5 attempts per 15 minutes per IP
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Too many verification requests. Please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/auth/send-signup-otp', otpLimiter);
+app.use('/api/auth/forgot-password', otpLimiter);
+app.use('/api/teams/send-otp', otpLimiter);
 
 // Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async ({ to, subject, html }) => {
   // ═══════════════════════════════════════════
-  // Priority 1: Use Nodemailer SMTP (Gmail) — direct delivery via IPv6
+  // Nodemailer SMTP (Gmail) — direct delivery via IPv6 on Railway
   // ═══════════════════════════════════════════
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
     const smtpPort = parseInt(process.env.SMTP_PORT) || 587;
@@ -34,39 +34,6 @@ const sendEmail = async ({ to, subject, html }) => {
 
     console.log(`✅ Email sent successfully via SMTP to: ${to} (ID: ${info.messageId})`);
     return { success: true, id: info.messageId };
-  }
-
-  // ═══════════════════════════════════════════
-  // Priority 2: Use Brevo HTTP API (fallback if SMTP not configured)
-  // ═══════════════════════════════════════════
-  if (process.env.BREVO_API_KEY) {
-    const fromEmail = process.env.SMTP_USER || 'omgawde1206@gmail.com';
-    console.log(`📧 Sending email via Brevo API to: ${to} (from: ${fromEmail})`);
-
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'api-key': process.env.BREVO_API_KEY,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        sender: { name: 'Praja Quiz Platform', email: fromEmail },
-        to: [{ email: to }],
-        subject,
-        htmlContent: html
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('❌ Brevo API error:', JSON.stringify(data));
-      throw new Error(data.message || 'Brevo API failed');
-    }
-
-    console.log(`✅ Email sent successfully via Brevo. ID: ${data.messageId}`);
-    return { success: true, id: data.messageId };
   }
 
   // ═══════════════════════════════════════════

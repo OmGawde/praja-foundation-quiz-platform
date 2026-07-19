@@ -58,7 +58,7 @@ module.exports = (io) => {
 
         console.log(`👥 Team "${team.teamName}" joined quiz ${quizId}`);
       } catch (error) {
-        socket.emit('error', { message: error.message });
+        socket.emit('error', { message: 'Failed to join quiz' });
       }
     });
 
@@ -105,7 +105,7 @@ module.exports = (io) => {
 
         console.log(`🎮 Quiz ${quizId} STARTED. Teams getting randomized questions.`);
       } catch (error) {
-        socket.emit('error', { message: error.message });
+        socket.emit('error', { message: 'Failed to start quiz' });
       }
     });
 
@@ -269,7 +269,7 @@ module.exports = (io) => {
         console.log(`⏭️ Team "${team.teamName}" moved to Q${nextIndex + 1}`);
       } catch (error) {
         console.error('fetchNextQuestion error:', error);
-        socket.emit('error', { message: error.message });
+        socket.emit('error', { message: 'Failed to load next question' });
       }
     });
 
