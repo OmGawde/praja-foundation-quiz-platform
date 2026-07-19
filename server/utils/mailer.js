@@ -1,36 +1,59 @@
 const nodemailer = require('nodemailer');
-const dns = require('dns');
-const { promisify } = require('util');
-
-const resolve4 = promisify(dns.resolve4);
 
 const sendEmail = async ({ to, subject, html }) => {
-  // If SMTP configurations are missing, log to console for development
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.log(`\n📧 [MAIL OVERRIDE - SMTP UNCONFIGURED]`);
-    console.log(`To: ${to}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Content:\n${html.replace(/<[^>]*>/g, '')}`);
-    console.log(`═════════════════════════════════════════\n`);
-    return { success: true, logged: true };
-  }
+  // ═══════════════════════════════════════════
+  // Priority 1: Use Resend HTTP API (works on Render, no SMTP ports needed)
+  // ═══════════════════════════════════════════
+  if (process.env.RESEND_API_KEY) {
+    const fromEmail = process.env.SMTP_USER || 'onboarding@resend.dev';
+    console.log(`📧 Sending email via Resend API to: ${to}`);
 
-  const smtpHost = process.env.SMTP_HOST;
-  let resolvedHost = smtpHost;
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
+      },
+      body: JSON.stringify({
+        from: `Praja Quiz Platform <${fromEmail}>`,
+        to: [to],
+        subject,
+        html
+      })
+    });
 
-  // Manually resolve hostname to IPv4 to avoid ENETUNREACH on platforms
-  // where IPv6 is not available (e.g. Render free tier)
-  try {
-    const addresses = await resolve4(smtpHost);
-    if (addresses && addresses.length > 0) {
-      resolvedHost = addresses[0];
-      console.log(`📡 Resolved SMTP host ${smtpHost} → IPv4 ${resolvedHost}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('❌ Resend API error:', JSON.stringify(data));
+      throw new Error(data.message || 'Resend API failed');
     }
-  } catch (dnsErr) {
-    console.log(`⚠️ IPv4 DNS resolution failed for ${smtpHost}, using original hostname. Error: ${dnsErr.message}`);
+
+    console.log(`✅ Email sent successfully via Resend. ID: ${data.id}`);
+    return { success: true, id: data.id };
   }
 
-    // Render blocks port 587 (STARTTLS). Use port 465 (SSL) by default.
+  // ═══════════════════════════════════════════
+  // Priority 2: Use SMTP (for local development or non-Render hosts)
+  // ═══════════════════════════════════════════
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    const dns = require('dns');
+    const { promisify } = require('util');
+    const resolve4 = promisify(dns.resolve4);
+
+    const smtpHost = process.env.SMTP_HOST;
+    let resolvedHost = smtpHost;
+
+    try {
+      const addresses = await resolve4(smtpHost);
+      if (addresses && addresses.length > 0) {
+        resolvedHost = addresses[0];
+        console.log(`📡 Resolved SMTP host ${smtpHost} → IPv4 ${resolvedHost}`);
+      }
+    } catch (dnsErr) {
+      console.log(`⚠️ IPv4 DNS resolution failed, using original hostname.`);
+    }
+
     const smtpPort = parseInt(process.env.SMTP_PORT) || 465;
     const isSecure = smtpPort === 465;
 
@@ -46,20 +69,32 @@ const sendEmail = async ({ to, subject, html }) => {
       },
       tls: {
         rejectUnauthorized: false,
-        servername: smtpHost  // Required for TLS handshake when connecting via raw IP
+        servername: smtpHost
       },
-      connectionTimeout: 10000,  // 10 second timeout
+      connectionTimeout: 10000,
       greetingTimeout: 10000
     });
 
-  await transporter.sendMail({
-    from: `"Praja Quiz Platform" <${process.env.SMTP_USER}>`,
-    to,
-    subject,
-    html
-  });
+    await transporter.sendMail({
+      from: `"Praja Quiz Platform" <${process.env.SMTP_USER}>`,
+      to,
+      subject,
+      html
+    });
 
-  return { success: true };
+    console.log(`✅ Email sent successfully via SMTP to: ${to}`);
+    return { success: true };
+  }
+
+  // ═══════════════════════════════════════════
+  // Fallback: Log to console (development mode)
+  // ═══════════════════════════════════════════
+  console.log(`\n📧 [MAIL FALLBACK - NO EMAIL PROVIDER CONFIGURED]`);
+  console.log(`To: ${to}`);
+  console.log(`Subject: ${subject}`);
+  console.log(`Content:\n${html.replace(/<[^>]*>/g, '')}`);
+  console.log(`═════════════════════════════════════════\n`);
+  return { success: true, logged: true };
 };
 
 module.exports = sendEmail;
