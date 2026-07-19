@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
 
 const sendEmail = async ({ to, subject, html }) => {
   // If SMTP configurations are missing, log to console for development
@@ -21,6 +22,10 @@ const sendEmail = async ({ to, subject, html }) => {
     },
     tls: {
       rejectUnauthorized: false
+    },
+    // Force IPv4 lookup (fixes ENETUNREACH issues on environments with disabled/broken IPv6 like Render)
+    lookup: (hostname, options, callback) => {
+      dns.lookup(hostname, { family: 4 }, callback);
     }
   });
 
