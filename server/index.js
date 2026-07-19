@@ -21,6 +21,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Render load balancer) for rate limiting
 const server = http.createServer(app);
 
 // Socket.io setup
