@@ -2,10 +2,11 @@ const router = require('express').Router();
 const fs = require('fs');
 const { auth } = require('../middleware/auth');
 const { uploadMedia, MEDIA_LIMITS } = require('../middleware/upload');
+const cloudinary = require('../config/cloudinary');
 
 // POST /api/upload/media - Upload media file with type-specific size limits
 router.post('/media', auth, (req, res) => {
-  uploadMedia.single('file')(req, res, (err) => {
+  uploadMedia.single('file')(req, res, async (err) => {
     // Handle multer errors (file too large, invalid type, etc.)
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
@@ -33,12 +34,43 @@ router.post('/media', auth, (req, res) => {
     }
 
     const fileUrl = `/uploads/${req.file.filename}`;
+
+    // Upload to Cloudinary if environment variables are set
+    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+      try {
+        console.log(`☁️ Uploading media file ${req.file.filename} to Cloudinary...`);
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'praja_quiz_media',
+          resource_type: 'auto'
+        });
+
+        // Clean up the local temporary file
+        fs.unlink(req.file.path, (unlinkErr) => {
+          if (unlinkErr) console.error('Failed to delete temp file:', unlinkErr);
+        });
+
+        console.log(`✅ Cloudinary upload success: ${result.secure_url}`);
+        return res.json({
+          url: result.secure_url,
+          filename: req.file.filename,
+          originalName: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          provider: 'cloudinary'
+        });
+      } catch (cloudinaryErr) {
+        console.error('❌ Cloudinary upload failed, falling back to local file:', cloudinaryErr.message);
+      }
+    }
+
+    // Local serving fallback (development or fallback mode)
     res.json({
       url: fileUrl,
       filename: req.file.filename,
       originalName: req.file.originalname,
       mimetype: req.file.mimetype,
-      size: req.file.size
+      size: req.file.size,
+      provider: 'local'
     });
   });
 });
