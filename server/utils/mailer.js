@@ -1,5 +1,8 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
+const { promisify } = require('util');
+
+const resolve4 = promisify(dns.resolve4);
 
 const sendEmail = async ({ to, subject, html }) => {
   // If SMTP configurations are missing, log to console for development
@@ -12,8 +15,23 @@ const sendEmail = async ({ to, subject, html }) => {
     return { success: true, logged: true };
   }
 
+  const smtpHost = process.env.SMTP_HOST;
+  let resolvedHost = smtpHost;
+
+  // Manually resolve hostname to IPv4 to avoid ENETUNREACH on platforms
+  // where IPv6 is not available (e.g. Render free tier)
+  try {
+    const addresses = await resolve4(smtpHost);
+    if (addresses && addresses.length > 0) {
+      resolvedHost = addresses[0];
+      console.log(`📡 Resolved SMTP host ${smtpHost} → IPv4 ${resolvedHost}`);
+    }
+  } catch (dnsErr) {
+    console.log(`⚠️ IPv4 DNS resolution failed for ${smtpHost}, using original hostname. Error: ${dnsErr.message}`);
+  }
+
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host: resolvedHost,
     port: parseInt(process.env.SMTP_PORT) || 587,
     secure: (process.env.SMTP_PORT === '465'),
     auth: {
@@ -21,11 +39,8 @@ const sendEmail = async ({ to, subject, html }) => {
       pass: process.env.SMTP_PASS
     },
     tls: {
-      rejectUnauthorized: false
-    },
-    // Force IPv4 lookup (fixes ENETUNREACH issues on environments with disabled/broken IPv6 like Render)
-    lookup: (hostname, options, callback) => {
-      dns.lookup(hostname, { family: 4 }, callback);
+      rejectUnauthorized: false,
+      servername: smtpHost  // Required for TLS handshake when connecting via raw IP
     }
   });
 
