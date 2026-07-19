@@ -30,19 +30,27 @@ const sendEmail = async ({ to, subject, html }) => {
     console.log(`⚠️ IPv4 DNS resolution failed for ${smtpHost}, using original hostname. Error: ${dnsErr.message}`);
   }
 
-  const transporter = nodemailer.createTransport({
-    host: resolvedHost,
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: (process.env.SMTP_PORT === '465'),
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    },
-    tls: {
-      rejectUnauthorized: false,
-      servername: smtpHost  // Required for TLS handshake when connecting via raw IP
-    }
-  });
+    // Render blocks port 587 (STARTTLS). Use port 465 (SSL) by default.
+    const smtpPort = parseInt(process.env.SMTP_PORT) || 465;
+    const isSecure = smtpPort === 465;
+
+    console.log(`📧 Connecting to SMTP: ${resolvedHost}:${smtpPort} (secure: ${isSecure})`);
+
+    const transporter = nodemailer.createTransport({
+      host: resolvedHost,
+      port: smtpPort,
+      secure: isSecure,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      },
+      tls: {
+        rejectUnauthorized: false,
+        servername: smtpHost  // Required for TLS handshake when connecting via raw IP
+      },
+      connectionTimeout: 10000,  // 10 second timeout
+      greetingTimeout: 10000
+    });
 
   await transporter.sendMail({
     from: `"Praja Quiz Platform" <${process.env.SMTP_USER}>`,
