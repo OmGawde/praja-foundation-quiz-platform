@@ -1,20 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../../utils/api';
 
 export default function LandingPage() {
-  const [joinCode, setJoinCode] = useState('');
   const [settings, setSettings] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     api.get('/settings').then(res => setSettings(res.data)).catch(console.error);
   }, []);
-
-  const handleJoin = (e) => {
-    e.preventDefault();
-    if (joinCode.trim()) navigate(`/register/${joinCode.trim().toUpperCase()}`);
-  };
 
   return (
     <div className="pt-8 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
@@ -33,23 +27,16 @@ export default function LandingPage() {
             {settings?.heroText || 'National Excellence in Education. Join the premier platform for national-level competitions.'}
           </p>
 
-          {/* Join Code Card */}
-          <form onSubmit={handleJoin} className="bg-surface-container-lowest p-6 rounded-xl ambient-shadow ghost-border inline-block mt-4 w-full max-w-md">
-            <label className="block text-xs uppercase tracking-widest text-on-surface-variant mb-2 font-semibold">Enter National Join Code</label>
-            <div className="flex gap-3">
-              <input
-                type="text"
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value)}
-                placeholder="e.g. PQ-2024-X"
-                className="w-full bg-surface-container-high border-none rounded-lg px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-outline text-lg font-medium"
-              />
-              <button type="submit" className="gradient-primary text-on-primary px-6 py-3 rounded-lg font-semibold hover:opacity-95 transition-opacity flex-shrink-0 flex items-center justify-center">
-                <span className="material-symbols-outlined mr-2 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>login</span>
-                Join
-              </button>
-            </div>
-          </form>
+          <div className="flex flex-col sm:flex-row gap-4 mt-8">
+            <Link to="/join" className="gradient-primary text-on-primary text-lg font-bold py-4 px-8 rounded-xl text-center shadow-lg shadow-primary/20 hover:opacity-95 transition-opacity inline-flex items-center justify-center gap-2">
+              <span className="material-symbols-outlined">quiz</span>
+              Join Quiz
+            </Link>
+            <Link to="/register" className="bg-white text-primary text-lg font-bold py-4 px-8 rounded-xl text-center border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors inline-flex items-center justify-center gap-2">
+              <span className="material-symbols-outlined">person_add</span>
+              Create Account
+            </Link>
+          </div>
         </div>
 
         {/* Right Side — Competition Showcase Box */}

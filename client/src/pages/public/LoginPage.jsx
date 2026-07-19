@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,11 +16,8 @@ export default function LoginPage() {
     try {
       const data = await login(form.email, form.password);
       toast.success('Welcome back!');
-      if (data.user.role === 'admin' || data.user.role === 'quiz_manager') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/join');
-      }
+      const from = location.state?.from?.pathname || (data.user.role === 'admin' || data.user.role === 'quiz_manager' ? '/admin/dashboard' : '/join');
+      navigate(from, { replace: true });
     } catch (err) {
       toast.error(err.response?.data?.error || 'Authentication failed');
     } finally {

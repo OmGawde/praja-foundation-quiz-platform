@@ -368,10 +368,25 @@ export default function QuizCreation() {
                 <div className="mb-6">
                   <label className="block text-sm font-semibold text-on-surface mb-2">Media File</label>
                   {q.mediaUrl ? (
-                    <div className="flex items-center gap-3 p-3 bg-[#dcfce7] rounded-lg">
-                      <span className="material-symbols-outlined text-[#15803d]">check_circle</span>
-                      <span className="text-sm text-[#15803d] font-medium">Media uploaded</span>
-                      <button onClick={() => updateQuestion(qIdx, 'mediaUrl', '')} className="ml-auto text-sm text-error">Remove</button>
+                    <div className="flex flex-col gap-3 p-4 bg-surface-container-low rounded-xl border border-[#86efac]/50">
+                      <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#15803d]">check_circle</span>
+                        <span className="text-sm text-[#15803d] font-medium">Media uploaded successfully</span>
+                        <button onClick={() => updateQuestion(qIdx, 'mediaUrl', '')} className="ml-auto text-sm text-error font-semibold hover:underline">Remove</button>
+                      </div>
+                      
+                      {/* Media Preview Box */}
+                      <div className="mt-2 flex justify-center bg-slate-950/5 p-4 rounded-lg border border-slate-100">
+                        {q.type === 'image' && (
+                          <img src={q.mediaUrl} alt="Question preview" className="max-h-48 object-contain rounded-lg shadow-sm border border-slate-200 bg-white" />
+                        )}
+                        {q.type === 'video' && (
+                          <video src={q.mediaUrl} controls className="max-h-48 rounded-lg shadow-sm bg-black border border-slate-800" />
+                        )}
+                        {q.type === 'audio' && (
+                          <audio src={q.mediaUrl} controls className="w-full max-w-md" />
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <div>

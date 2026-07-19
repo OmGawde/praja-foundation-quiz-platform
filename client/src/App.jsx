@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
 // Layouts
@@ -32,8 +32,9 @@ import Settings from './pages/admin/Settings';
 // Protected Route wrapper
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <div className="flex items-center justify-center h-screen bg-surface"><div className="text-primary text-xl font-bold">Loading...</div></div>;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   return children;
 }
 
@@ -43,12 +44,12 @@ export default function App() {
       {/* Public Routes */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/join" element={<JoinQuiz />} />
         <Route path="/register/:joinCode" element={<TeamRegistration />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/join" element={<ProtectedRoute><JoinQuiz /></ProtectedRoute>} />
       </Route>
 
       {/* Quiz Flow - No Layout (focused experience) */}
