@@ -104,12 +104,12 @@ export default function TeamRegistration() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-label font-semibold text-on-surface mb-2">Leader's Email *</label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input name="email" type="email" value={form.email} onChange={handleChange} required disabled={otpSent}
-                    className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-3 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow disabled:opacity-75"
+                    className="flex-grow bg-surface-container-highest border-transparent rounded-lg px-4 py-3 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow disabled:opacity-75"
                     placeholder="leader@email.com" />
                   <button type="button" onClick={handleSendOtp} disabled={sendingOtp || !form.email}
-                    className="gradient-primary text-on-primary text-xs px-4 rounded-lg font-bold flex-shrink-0 hover:opacity-90 transition-opacity disabled:opacity-50">
+                    className="gradient-primary text-on-primary text-xs px-4 py-3 rounded-lg font-bold flex-shrink-0 hover:opacity-90 transition-opacity disabled:opacity-50 min-h-[42px] sm:min-w-[100px]">
                     {sendingOtp ? 'Sending...' : (otpSent ? 'Resend' : 'Send Code')}
                   </button>
                 </div>

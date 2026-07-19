@@ -48,7 +48,7 @@ export default function QuizManagement() {
   };
 
   return (
-    <div className="p-8 md:p-12 max-w-[1400px] mx-auto w-full">
+    <div className="p-4 sm:p-8 md:p-12 max-w-[1400px] mx-auto w-full">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-sm font-medium text-on-surface-variant mb-4 uppercase tracking-wider">
         <Link to="/admin/competitions" className="hover:text-primary transition-colors">Competitions</Link>

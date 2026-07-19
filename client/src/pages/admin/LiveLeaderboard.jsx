@@ -85,7 +85,7 @@ export default function LiveLeaderboard() {
   const avgTime = teams.length > 0 && totalCorrect > 0 ? (totalTime / totalCorrect / 1000).toFixed(1) : '0';
 
   return (
-    <div className="p-8 md:p-12 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-8 md:p-12 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div className="flex items-center gap-4">

@@ -304,7 +304,7 @@ export default function QuizCreation() {
   ];
 
   return (
-    <div className="p-8 md:p-12 max-w-5xl mx-auto w-full pb-24">
+    <div className="p-4 sm:p-8 md:p-12 max-w-5xl mx-auto w-full pb-24">
       {/* Header */}
       <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>

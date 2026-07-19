@@ -58,7 +58,7 @@ export default function Archives() {
   const filtered = archives.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="p-8 md:p-12 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-8 md:p-12 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
         <div>

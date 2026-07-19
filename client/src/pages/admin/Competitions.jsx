@@ -56,18 +56,18 @@ export default function Competitions() {
   const totalParticipants = competitions.reduce((a, c) => a + (c.participantCount || 0), 0);
 
   return (
-    <div className="p-8 md:p-12 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-8 md:p-12 max-w-7xl mx-auto w-full">
       {/* Header — Stitch Design 8 */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
         <div>
           <h2 className="text-3xl font-bold text-on-surface tracking-tight font-headline">National Competitions</h2>
           <p className="text-on-surface-variant mt-2 text-sm font-body">Manage active tournaments, regional rounds, and overall progress.</p>
         </div>
-        <div className="flex gap-4">
-          <div className="relative">
+        <div className="flex gap-4 w-full md:w-auto">
+          <div className="relative w-full md:w-auto">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
             <input value={search} onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2.5 bg-surface-container-highest border-none rounded-lg text-sm text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/40 w-64" placeholder="Search competitions..." />
+              className="pl-10 pr-4 py-2.5 bg-surface-container-highest border-none rounded-lg text-sm text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/40 w-full md:w-64" placeholder="Search competitions..." />
           </div>
         </div>
       </div>
@@ -148,7 +148,7 @@ export default function Competitions() {
               <h3 className="text-xl font-bold text-on-surface font-headline mb-1">{comp.name}</h3>
               <p className="text-sm text-on-surface-variant">{comp.description}</p>
             </div>
-            <div className="flex items-center gap-8 md:px-8">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-8 md:px-8">
               <div><p className="text-xs text-outline uppercase tracking-wider mb-1 font-label">Rounds</p><p className="font-semibold text-on-surface">{comp.roundCount}</p></div>
               <div><p className="text-xs text-outline uppercase tracking-wider mb-1 font-label">Started</p><p className="font-semibold text-on-surface">{new Date(comp.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p></div>
               <div><p className="text-xs text-outline uppercase tracking-wider mb-1 font-label">Participants</p><p className="font-semibold text-on-surface">{(comp.participantCount || 0).toLocaleString()}</p></div>

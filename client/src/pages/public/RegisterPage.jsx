@@ -88,64 +88,13 @@ export default function RegisterPage() {
           <p className="text-on-surface-variant">Create a persistent team profile to join quizzes instantly.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column: Account Details */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-primary font-headline border-b pb-2 mb-4">Account Credentials</h3>
-              
-              <div>
-                <label className="block text-sm font-label font-semibold text-on-surface mb-2">Username</label>
-                <input type="text" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required
-                  className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="e.g. team_alpha" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-label font-semibold text-on-surface mb-2">Email Address</label>
-                <div className="flex gap-2">
-                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required disabled={otpSent}
-                    className="flex-grow bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow disabled:opacity-75" placeholder="leader@example.com" />
-                  <button type="button" onClick={handleSendOtp} disabled={sendingOtp || countdown > 0}
-                    className="px-4 py-2.5 text-xs font-bold text-on-primary gradient-primary rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity whitespace-nowrap min-w-[120px]">
-                    {sendingOtp ? 'Sending...' : countdown > 0 ? `Resend (${countdown}s)` : otpSent ? 'Resend code' : 'Send code'}
-                  </button>
-                </div>
-                {otpSent && (
-                  <div className="text-right mt-1">
-                    <button type="button" onClick={() => { setOtpSent(false); setForm({ ...form, otp: '' }); }} className="text-xs text-primary font-semibold hover:underline">
-                      Change email address
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {otpSent && (
-                <div>
-                  <label className="block text-sm font-label font-semibold text-on-surface mb-2">Verification Code (OTP)</label>
-                  <input type="text" value={form.otp} onChange={(e) => setForm({ ...form, otp: e.target.value })} required
-                    className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow text-center font-bold tracking-widest text-lg" placeholder="123456" maxLength={6} />
-                  <p className="text-xs text-on-surface-variant mt-1">Check your email for the 6-digit OTP code.</p>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-label font-semibold text-on-surface mb-2">Password</label>
-                <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required
-                  className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="At least 8 chars (1 letter + 1 number)" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-label font-semibold text-on-surface mb-2">Contact Phone (Optional)</label>
-                <input type="text" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="e.g. +91 98765 43210" />
-              </div>
-            </div>
-
-            {/* Right Column: Team & Institute details */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-primary font-headline border-b pb-2 mb-4">Team Profile</h3>
-
-              <div>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Section 1: Team Details */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-primary font-headline border-b pb-2 mb-4">1. Team & Organization</h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-label font-semibold text-on-surface mb-2">Team Name</label>
                 <input type="text" value={form.teamName} onChange={(e) => setForm({ ...form, teamName: e.target.value })} required
                   className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="e.g. Code Wizards" />
@@ -163,10 +112,63 @@ export default function RegisterPage() {
                   className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="Firstname Lastname" />
               </div>
 
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-label font-semibold text-on-surface mb-2">Institute Name</label>
                 <input type="text" value={form.institute} onChange={(e) => setForm({ ...form, institute: e.target.value })} required
                   className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="e.g. IIT Bombay" />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Account Credentials */}
+          <div className="space-y-4 pt-4 border-t border-slate-200/50">
+            <h3 className="text-lg font-bold text-primary font-headline border-b pb-2 mb-4">2. Account Credentials</h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-label font-semibold text-on-surface mb-2">Username</label>
+                <input type="text" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required
+                  className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="e.g. team_alpha" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-label font-semibold text-on-surface mb-2">Contact Phone (Optional)</label>
+                <input type="text" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="e.g. +91 98765 43210" />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-label font-semibold text-on-surface mb-2">Email Address</label>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required disabled={otpSent}
+                    className="flex-grow bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow disabled:opacity-75" placeholder="leader@example.com" />
+                  <button type="button" onClick={handleSendOtp} disabled={sendingOtp || countdown > 0}
+                    className="px-4 py-2.5 text-xs font-bold text-on-primary gradient-primary rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity whitespace-nowrap min-h-[42px] sm:min-w-[120px]">
+                    {sendingOtp ? 'Sending...' : countdown > 0 ? `Resend (${countdown}s)` : otpSent ? 'Resend code' : 'Send code'}
+                  </button>
+                </div>
+                {otpSent && (
+                  <div className="text-right mt-1">
+                    <button type="button" onClick={() => { setOtpSent(false); setForm({ ...form, otp: '' }); }} className="text-xs text-primary font-semibold hover:underline">
+                      Change email address
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {otpSent && (
+                <div className="sm:col-span-2 bg-slate-50 p-4 rounded-lg border border-primary/10">
+                  <label className="block text-sm font-label font-semibold text-on-surface mb-2">Verification Code (OTP)</label>
+                  <input type="text" value={form.otp} onChange={(e) => setForm({ ...form, otp: e.target.value })} required
+                    className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow text-center font-bold tracking-widest text-lg" placeholder="123456" maxLength={6} />
+                  <p className="text-xs text-on-surface-variant mt-1">Check your email for the 6-digit OTP code.</p>
+                </div>
+              )}
+
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-label font-semibold text-on-surface mb-2">Password</label>
+                <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required
+                  className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="At least 8 chars (1 letter + 1 number)" />
               </div>
             </div>
           </div>

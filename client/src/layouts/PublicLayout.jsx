@@ -14,15 +14,15 @@ export default function PublicLayout() {
     <div className="bg-surface text-on-surface antialiased flex flex-col min-h-screen">
       {/* TopNavBar */}
       <nav className="fixed top-0 w-full z-50 glass-nav shadow-sm" style={{ backgroundColor: 'rgba(246, 249, 255, 0.85)' }}>
-        <div className="flex justify-between items-center px-8 h-16 max-w-7xl mx-auto">
-          <Link to="/" className="text-xl font-black tracking-tight text-primary flex items-center gap-2">
-            {settings?.logoUrl && <img src={settings.logoUrl} alt="Logo" className="h-8 object-contain" />}
+        <div className="flex justify-between items-center px-4 sm:px-8 h-16 max-w-7xl mx-auto">
+          <Link to="/" className="text-lg sm:text-xl font-black tracking-tight text-primary flex items-center gap-1.5 sm:gap-2">
+            {settings?.logoUrl && <img src={settings.logoUrl} alt="Logo" className="h-6 sm:h-8 object-contain" />}
             {settings?.platformName || 'PRAJA QUIZ'}
           </Link>
           <div className="hidden md:flex items-center gap-8 font-sans antialiased">
             <Link to="/join" className="text-slate-600 hover:text-blue-600 transition-colors">Join Quiz</Link>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {user ? (
               <>
                 <span className="text-sm font-medium text-slate-700 hidden sm:inline">
@@ -30,24 +30,24 @@ export default function PublicLayout() {
                 </span>
                 
                 {(user.role === 'admin' || user.role === 'quiz_manager') && (
-                  <Link to="/admin/dashboard" className="text-sm font-medium text-slate-700 hover:text-primary transition-colors flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">dashboard</span>
+                  <Link to="/admin/dashboard" className="text-xs sm:text-sm font-medium text-slate-700 hover:text-primary transition-colors flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm sm:text-base">dashboard</span>
                     Admin
                   </Link>
                 )}
 
-                <button onClick={logout} className="text-sm font-medium text-on-primary gradient-primary px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1">
-                  <span className="material-symbols-outlined text-base">logout</span>
+                <button onClick={logout} className="text-xs sm:text-sm font-medium text-on-primary gradient-primary px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm sm:text-base">logout</span>
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-sm font-medium text-slate-700 hover:text-primary transition-colors">
+                <Link to="/login" className="text-xs sm:text-sm font-medium text-slate-700 hover:text-primary transition-colors">
                   Sign In
                 </Link>
-                <Link to="/register" className="text-sm font-medium text-on-primary gradient-primary px-4 py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1">
-                  <span className="material-symbols-outlined text-base">person_add</span>
+                <Link to="/register" className="text-xs sm:text-sm font-medium text-on-primary gradient-primary px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm sm:text-base">person_add</span>
                   Sign Up
                 </Link>
               </>

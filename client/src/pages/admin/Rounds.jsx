@@ -51,7 +51,7 @@ export default function Rounds() {
   };
 
   return (
-    <div className="p-8 md:p-12 max-w-6xl mx-auto w-full">
+    <div className="p-4 sm:p-8 md:p-12 max-w-6xl mx-auto w-full">
       {/* Breadcrumbs */}
       <nav className="flex text-sm text-on-surface-variant mb-6 font-medium">
         <Link to="/admin/competitions" className="hover:text-primary transition-colors">Competitions</Link>

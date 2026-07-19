@@ -59,7 +59,7 @@ export default function Analytics() {
   };
 
   return (
-    <div className="p-8 md:p-12 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-8 md:p-12 max-w-7xl mx-auto w-full">
       {/* Header */}
       <header className="flex justify-between items-center mb-8">
         <div>
