@@ -2,6 +2,8 @@
 
 Welcome to the **Praja Foundation Quiz Platform**. This is a functional, real-time, self-paced interactive MERN stack web application built specifically for hosting multi-team quiz events and tracking scores in real-time.
 
+---
+
 ## 🚀 Features
 
 ### **Participant (Public) Experience**
@@ -10,34 +12,59 @@ Welcome to the **Praja Foundation Quiz Platform**. This is a functional, real-ti
 - **Real-Time Timer & Feedback:** Live visual countdown limits with instantaneous correctness feedback after submission.
 - **Review System:** Dedicated screens for teams to review correct answers post-quiz.
 - **Public Leaderboard:** Live ranking system for spectators and participants without admin access.
+- **Mobile Optimized:** Full-featured responsive design so participants can play on their smartphones.
 
 ### **Admin Management**
 - **Full Scope Management:** Dashboard to manage distinct Competitions, Rounds, and individual Quizzes.
 - **Question Banks:** Formulate comprehensive question sets with multi-media support (Image/Audio/Video).
-- **Bulk Upload Support:** Load questions directly via structured Excel/CSV files.
+- **Bulk Upload Support:** Load questions directly via structured CSV files.
 - **Live Leaderboard Control:** Visually observe active participants, monitor scores, verify submitted answers in real time via WebSockets.
 - **Quiz Tracking:** Force end quizzes, download result analytics as CSVs, and oversee tab-switch alerts.
+- **Mobile-Responsive Panel:** Full admin controls accessible via mobile devices via a responsive sidebar hamburger drawer.
+
+---
 
 ## 🛠️ Technology Stack
 - **Frontend:** React, Vite, Tailwind CSS, Socket.io-client
 - **Backend:** Node.js, Express, Socket.io (WebSocket Engine)
-- **Database:** MongoDB (via Mongoose)
+- **Database:** MongoDB Atlas (Production) / Local MongoDB (Development)
 - **Authentication:** JWT (JSON Web Tokens)
+- **Media Uploads:** Cloudinary (for persistent image/audio/video uploads)
+- **Mail Delivery:** Nodemailer with Gmail SMTP (configured for secure IPv6/IPv4 transport)
 
 ---
 
-## 🏃 Walkthrough & Setup
+## 🏃 Deployment & Environment Configuration
 
-### Prerequisites
-- [Node.js](https://nodejs.org/en/) (v16.0 or higher recommended)
-- [MongoDB](https://www.mongodb.com/) running locally on default port `27017` (or updated Atlas URI mapped in your `.env` file).
+### Production Environment Variables (Railway / Cloud Deployment)
+
+Configure the following environment variables on your cloud hosting platform (e.g., Railway):
+
+| Variable | Description | Example / Recommended Value |
+|---|---|---|
+| `PORT` | The port the backend server runs on | `8080` |
+| `NODE_ENV` | Run mode | `production` |
+| `MONGO_URI` | Connection URI for MongoDB | `mongodb+srv://...` |
+| `JWT_SECRET` | Secret key for generating auth tokens | `your_secure_jwt_secret` |
+| `CLIENT_URL` | Frontend client origin (if separate) | `https://your-app.up.railway.app` |
+| `SMTP_HOST` | SMTP server address for email delivery | `smtp.gmail.com` |
+| `SMTP_PORT` | SMTP server port | `587` |
+| `SMTP_USER` | Verified email address used to send mails | `your_gmail_address@gmail.com` |
+| `SMTP_PASS` | App password generated from your Google Account | `xxxx xxxx xxxx xxxx` |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary Cloud Name | `your_cloud_name` |
+| `CLOUDINARY_API_KEY` | Cloudinary API Key | `your_api_key` |
+| `CLOUDINARY_API_SECRET` | Cloudinary API Secret | `your_api_secret` |
+
+---
+
+## 💻 Local Development Setup
 
 ### 1. Installation
 
 You can automatically configure both your client and server by running the included batch script:
 
 ```bash
-# Double-click the setup.bat file in the root folder, OR run in terminal:
+# Run in terminal from the root folder:
 .\setup.bat
 ```
 
@@ -52,13 +79,11 @@ cd ../client
 npm install
 ```
 
-### 2. Environment Variables (`.env`)
-In your `server` directory, ensure you have a `.env` file referencing your MongoDB and Secret Keys. Example:
-```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/praja_quiz
-JWT_SECRET=supersecretjwtkey
-CLIENT_URL=http://localhost:5173
+### 2. Seeding the Default Admin Account
+To create a default administrator account, run the seed script with the required variables:
+```bash
+cd server
+ADMIN_EMAIL=admin@praja.com ADMIN_PASSWORD=YourSecurePassword123 node seed.js
 ```
 
 ### 3. Starting the Platform
@@ -76,13 +101,4 @@ cd client
 npm run dev
 ```
 
-### 4. Usage Overview
-1. Visit the app at `http://localhost:5173`.
-2. First-time admins navigate to `/login` to authenticate and gain access to the dashboard.
-3. Over the **Admin Dashboard**, structure a new **Competition** ➔ **Round** ➔ **Quiz**.
-4. Inside **Quiz Creation**, distribute the generated **Join Code** to participants.
-5. Participants visit the landing page, enter the join code, register a team, and sit in the lobby.
-6. Admin tracks joined participants and clicks "Start Quiz" directly from the dashboard/lobby manager.
-
-## 🗂️ Task Tracker
-A granular compilation of identified features, fixed bugs, and final polish requirements for deployment can be actively reviewed inside the included [`TASK_TRACKER.md`](./TASK_TRACKER.md) file.
+Visit the application locally at `http://localhost:5173`.
