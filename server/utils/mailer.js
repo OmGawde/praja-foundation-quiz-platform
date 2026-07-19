@@ -2,7 +2,40 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async ({ to, subject, html }) => {
   // ═══════════════════════════════════════════
-  // Priority 1: Use Resend HTTP API (works on Render, no SMTP ports needed)
+  // Priority 1: Use Brevo HTTP API (works on Render, no SMTP ports, allows sending to anyone using verified sender email)
+  // ═══════════════════════════════════════════
+  if (process.env.BREVO_API_KEY) {
+    const fromEmail = process.env.SMTP_USER || 'omgawde1206@gmail.com';
+    console.log(`📧 Sending email via Brevo API to: ${to} (from: ${fromEmail})`);
+
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: { name: 'Praja Quiz Platform', email: fromEmail },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('❌ Brevo API error:', JSON.stringify(data));
+      throw new Error(data.message || 'Brevo API failed');
+    }
+
+    console.log(`✅ Email sent successfully via Brevo. ID: ${data.messageId}`);
+    return { success: true, id: data.messageId };
+  }
+
+  // ═══════════════════════════════════════════
+  // Priority 2: Use Resend HTTP API (works on Render, no SMTP ports needed)
   // ═══════════════════════════════════════════
   if (process.env.RESEND_API_KEY) {
     const replyTo = process.env.SMTP_USER || undefined;
