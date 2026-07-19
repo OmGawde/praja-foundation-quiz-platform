@@ -7,6 +7,8 @@ export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ newPassword: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [token, setToken] = useState('');
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
@@ -65,14 +67,50 @@ export default function ResetPasswordPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-label font-semibold text-on-surface mb-2">New Password</label>
-            <input type="password" value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} required
-              className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-3 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="At least 8 characters (1 letter + 1 number)" />
+            <div className="relative">
+              <input
+                type={showNewPassword ? 'text' : 'password'}
+                value={form.newPassword}
+                onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
+                required
+                className="w-full bg-surface-container-highest border-transparent rounded-lg pl-4 pr-11 py-3 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow"
+                placeholder="At least 8 characters (1 letter + 1 number)"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none"
+                title={showNewPassword ? 'Hide password' : 'Show password'}
+              >
+                <span className="material-symbols-outlined text-xl">
+                  {showNewPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-label font-semibold text-on-surface mb-2">Confirm New Password</label>
-            <input type="password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} required
-              className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-3 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="Confirm password" />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={form.confirmPassword}
+                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                required
+                className="w-full bg-surface-container-highest border-transparent rounded-lg pl-4 pr-11 py-3 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow"
+                placeholder="Confirm password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none"
+                title={showConfirmPassword ? 'Hide password' : 'Show password'}
+              >
+                <span className="material-symbols-outlined text-xl">
+                  {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
           </div>
 
           <button type="submit" disabled={loading}

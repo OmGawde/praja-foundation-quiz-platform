@@ -17,6 +17,7 @@ export default function RegisterPage() {
     otp: ''
   });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -167,8 +168,26 @@ export default function RegisterPage() {
 
               <div className="sm:col-span-2">
                 <label className="block text-sm font-label font-semibold text-on-surface mb-2">Password</label>
-                <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required
-                  className="w-full bg-surface-container-highest border-transparent rounded-lg px-4 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow" placeholder="At least 8 chars (1 letter + 1 number)" />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    required
+                    className="w-full bg-surface-container-highest border-transparent rounded-lg pl-4 pr-11 py-2.5 text-on-surface placeholder:text-outline-variant input-focus-ring transition-shadow"
+                    placeholder="At least 8 chars (1 letter + 1 number)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none"
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      {showPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
